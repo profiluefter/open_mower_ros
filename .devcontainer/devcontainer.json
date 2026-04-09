@@ -2,7 +2,7 @@
   "name": "ROS Noetic Development Container",
   "dockerComposeFile": "../devenv/docker-compose.yaml",
   "service": "ros",
-  "workspaceFolder": "/workspace",
+  "workspaceFolder": "/workspaces/open_mower_ros",
   "customizations": {
     "vscode": {
       "extensions": [
