@@ -5,15 +5,6 @@ on:
   push:
     branches:
       - 'main'
-      - 'v2'
-    paths:
-      - .github/workflows/build-devenv.yaml
-      - 'devenv/**'
-      - '.devcontainer/**'
-      - 'src/**/package.xml'
-  pull_request:
-    branches:
-      - 'main'
     paths:
       - .github/workflows/build-devenv.yaml
       - 'devenv/**'
@@ -49,12 +40,9 @@ jobs:
         with:
           images: ghcr.io/${{ github.repository_owner }}/open_mower_ros-devenv
           flavor: |
-            latest=auto
+            latest=true
           tags: |
-            type=edge,branch=main
-            type=ref,event=branch
-            type=ref,event=pr
-            type=sha
+            type=raw,value=latest
 
       - name: Build and push
         uses: docker/build-push-action@v6
@@ -65,7 +53,7 @@ jobs:
             MY_UID=1000
             MY_GID=1000
             MY_USER=dev
-          push: ${{ github.event_name != 'pull_request' }}
+          push: true
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
           target: devenv
