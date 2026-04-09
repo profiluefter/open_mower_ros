@@ -1,8 +1,11 @@
 services:
   ros:
+    image: ghcr.io/profiluefter/open_mower_ros-devenv:latest
     build:
       context: ..
       dockerfile: devenv/Dockerfile
+      cache_from:
+        - ghcr.io/profiluefter/open_mower_ros-devenv:latest
       args:
         - MY_UID=${MY_UID:-1000}
         - MY_GID=${MY_GID:-1000}
