@@ -7,16 +7,16 @@ on:
       - 'main'
       - 'v2'
     paths:
-      - 'open_mower_ros/devenv/**'
-      - 'open_mower_ros/.devcontainer/**'
-      - 'open_mower_ros/src/**/package.xml'
+      - 'devenv/**'
+      - '.devcontainer/**'
+      - 'src/**/package.xml'
   pull_request:
     branches:
       - 'main'
     paths:
-      - 'open_mower_ros/devenv/**'
-      - 'open_mower_ros/.devcontainer/**'
-      - 'open_mower_ros/src/**/package.xml'
+      - 'devenv/**'
+      - '.devcontainer/**'
+      - 'src/**/package.xml'
 
 permissions:
   packages: write

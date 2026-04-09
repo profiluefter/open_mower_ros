@@ -15,7 +15,8 @@
     }
   },
   "remoteUser": "dev",
-  "initializeCommand": "git submodule update --init --recursive && docker pull ghcr.io/profiluefter/open_mower_ros-devenv:latest || true",
+  "initializeCommand":
+      "git submodule update --init --recursive && docker pull ghcr.io/profiluefter/open_mower_ros-devenv:latest || true",
   "forwardPorts": [
     8080
   ]
