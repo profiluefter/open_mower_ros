@@ -15,5 +15,6 @@
     }
   },
   "remoteUser": "dev",
+  "forwardPorts": [8080],
   "postCreateCommand": "echo 'source /opt/ros/noetic/setup.bash' >> ~/.bashrc"
 }
