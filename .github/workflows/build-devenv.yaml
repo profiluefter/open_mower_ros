@@ -7,6 +7,7 @@ on:
       - 'main'
       - 'v2'
     paths:
+      - .github/workflows/build-devenv.yaml
       - 'devenv/**'
       - '.devcontainer/**'
       - 'src/**/package.xml'
@@ -14,6 +15,7 @@ on:
     branches:
       - 'main'
     paths:
+      - .github/workflows/build-devenv.yaml
       - 'devenv/**'
       - '.devcontainer/**'
       - 'src/**/package.xml'
