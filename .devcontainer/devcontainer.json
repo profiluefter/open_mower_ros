@@ -15,8 +15,8 @@
     }
   },
   "remoteUser": "dev",
+  "initializeCommand": "git submodule update --init --recursive",
   "forwardPorts": [
     8080
-  ],
-  "postCreateCommand": "bash -lc 'set -e; grep -qxF \"source /opt/ros/noetic/setup.bash\" ~/.bashrc || echo \"source /opt/ros/noetic/setup.bash\" >> ~/.bashrc; source /opt/ros/noetic/setup.bash; if [ ! -f /etc/ros/rosdep/sources.list.d/20-default.list ]; then sudo rosdep init; fi; rosdep update --rosdistro noetic; git -C /workspaces/open_mower_ros submodule update --init --recursive; sudo apt-get update; rosdep install --from-paths src --ignore-src --default-yes --rosdistro noetic'"
+  ]
 }

@@ -26,29 +26,53 @@ RUN bash -c "ssh-keygen -A"
 
 RUN echo "$MY_USER ALL=(ALL) NOPASSWD:ALL" >> /etc/sudoers
 
-# Update rosdep package manager for ROS
-RUN rosdep update --rosdistro $ROS_DISTRO
+# Ensure rosdep is initialized and refreshed during image build.
+RUN if [ ! -f /etc/ros/rosdep/sources.list.d/20-default.list ]; then rosdep init; fi \
+    && rosdep update --rosdistro $ROS_DISTRO
 
-# Create a new image layer based on the base image for storing dependencies
+RUN grep -qxF "source /opt/ros/noetic/setup.bash" "/home/${MY_USER}/.bashrc" \
+    || echo "source /opt/ros/noetic/setup.bash" >> "/home/${MY_USER}/.bashrc"
+
+# Create a new image layer based on the base image for storing dependencies.
+# Only package manifests are copied here so source code changes do not bust this cache layer.
 FROM base AS dependencies
 
-# Generate a sorted list of apt-get install commands corresponding to the dependencies.
-# No actual installation is performed in this stage.
-RUN --mount=type=bind,source=./,target=/tmp/open_mower_ros \
-    cd /tmp/open_mower_ros && \
-    rosdep install --from-paths src --ignore-src --simulate | \
-    sed --expression '1d' | sort | tr -d '\n' | sed --expression 's/  apt-get install//g' > /apt-install_list
+ENV DEBIAN_FRONTEND=noninteractive
+
+WORKDIR /tmp/open_mower_ros
+
+COPY --link src/mower_comms_v1/package.xml src/mower_comms_v1/package.xml
+COPY --link src/mower_comms_v2/package.xml src/mower_comms_v2/package.xml
+COPY --link src/mower_logic/package.xml src/mower_logic/package.xml
+COPY --link src/mower_map/package.xml src/mower_map/package.xml
+COPY --link src/mower_msgs/package.xml src/mower_msgs/package.xml
+COPY --link src/mower_simulation/package.xml src/mower_simulation/package.xml
+COPY --link src/mower_utils/package.xml src/mower_utils/package.xml
+COPY --link src/open_mower/package.xml src/open_mower/package.xml
+COPY --link src/lib/ftc_local_planner/package.xml src/lib/ftc_local_planner/package.xml
+COPY --link src/lib/ntrip_client/package.xml src/lib/ntrip_client/package.xml
+COPY --link src/lib/slic3r_coverage_planner/package.xml src/lib/slic3r_coverage_planner/package.xml
+COPY --link src/lib/xbot_driver_gps/package.xml src/lib/xbot_driver_gps/package.xml
+COPY --link src/lib/xbot_framework/package.xml src/lib/xbot_framework/package.xml
+COPY --link src/lib/xbot_monitoring/package.xml src/lib/xbot_monitoring/package.xml
+COPY --link src/lib/xbot_msgs/package.xml src/lib/xbot_msgs/package.xml
+COPY --link src/lib/xbot_positioning/package.xml src/lib/xbot_positioning/package.xml
+COPY --link src/lib/xbot_remote/package.xml src/lib/xbot_remote/package.xml
+COPY --link src/lib/xbot_rpc/package.xml src/lib/xbot_rpc/package.xml
+COPY --link src/lib/xesc_ros/xesc/package.xml src/lib/xesc_ros/xesc/package.xml
+COPY --link src/lib/xesc_ros/xesc_2040_driver/package.xml src/lib/xesc_ros/xesc_2040_driver/package.xml
+COPY --link src/lib/xesc_ros/xesc_driver/package.xml src/lib/xesc_ros/xesc_driver/package.xml
+COPY --link src/lib/xesc_ros/xesc_interface/package.xml src/lib/xesc_ros/xesc_interface/package.xml
+COPY --link src/lib/xesc_ros/xesc_msgs/package.xml src/lib/xesc_ros/xesc_msgs/package.xml
+COPY --link src/lib/xesc_ros/xesc_yfr4_driver/package.xml src/lib/xesc_ros/xesc_yfr4_driver/package.xml
+COPY --link src/lib/xesc_ros/vesc_driver/package.xml src/lib/xesc_ros/vesc_driver/package.xml
+
+RUN apt-get update && \
+    rosdep install --from-paths . --ignore-src --default-yes --rosdistro $ROS_DISTRO && \
+    rm -rf /var/lib/apt/lists/*
 
 # Create another image layer for the development environment
-FROM base AS devenv
-
-# Copy the list of packages into the new layer
-COPY --link --from=dependencies /apt-install_list /apt-install_list
-
-# Update package lists for upgrades or new package installation
-RUN apt-get update && \
-    apt-get install --no-install-recommends --yes $(cat /apt-install_list) && \
-    rm -rf /var/lib/apt/lists/*
+FROM dependencies AS devenv
 
 
 CMD ["sudo", "/usr/sbin/sshd", "-D", "-e", "-f", "/etc/ssh/sshd_clion"]
